@@ -1,9 +1,10 @@
-#!usr/bin/python
-
+# -*- coding:utf-8 -*-
+#!usr/bin/python3
 # r/Python based simple interpreter
 # 단순한 스택 머신임 , 2 or 3 호환
 from __future__ import print_function
 from collections import deque
+import sys
 
 class Stack(deque):
     push = deque.append
@@ -26,7 +27,7 @@ class Machine(object):
         return self.data_stack.top()
 
     def run(self):
-        while self.instrunction_pointer < len(self.code):
+        while self.instruction_pointer < len(self.code):
             opcode = self.code[self.instruction_pointer]
             self.instruction_pointer += 1
             self.dispatch(opcode)
@@ -60,3 +61,79 @@ class Machine(object):
             self.push(op[1:-1])
         else:
             raise RuntimeError("Unknown opcode : '%s'"% op)
+
+    def plus(self):
+        self.push(self.pop() + self.pop())
+
+    def minus(self):
+        last = self.pop()
+        self.push(self.pop() - last)
+
+    def mul(self):
+        self.push(self.pop() * self.pop())
+
+    def div(self):
+        last = self.pop()
+        self.push(self.pop() / last)
+
+    def mod(self):
+        last = self.pop()
+        self.push(self.pop() % last)
+
+    def dup(self):
+        self.push(self.top())
+
+    def eq(self):
+        self.push(str(self.pop()))
+
+    def cast_int(self):
+        self.push(int(self.pop()))
+
+    def cast_str(self):
+        self.push(str(self.pop()))
+
+    def over(self):
+        b = self.pop()
+        a = self.pop()
+        self.push(a)
+        self.push(b)
+        self.push(a)
+
+    def drop(self):
+        self.pop()
+
+    def swap(self):
+        b = self.pop()
+        a = self.pop()
+        self.push(b)
+        self.push(a)
+
+    def print_(self):
+        sys.stdout.write(str(self.pop()))
+        sys.stdout.flush()
+
+    def println(self):
+        sys.stdout.write("%s\n" % self.pop())
+        sys.stdout.flush()
+
+    def if_stmt(self):
+        false_clause = self.pop()
+        true_clause = self.pop()
+        test = self.pop()
+        self.push(true_clause if test else false_clause)
+
+    def jmp(self):
+        addr = self.pop()
+        if isinstance(addr, int) and 0 <= addr < len(self.code):
+            self.instruction_pointer = addr
+        else:
+            raise RuntimeError("JMP address must be a valid integer.")
+
+    def dump_stack(self):
+        print("Data stack (top first):")
+
+        for v in reversed(self.data_stack):
+            print(" - type %s, value '%s'" % (type(v), v))
+
+    def read(self):
+        self.push(raw_input())
