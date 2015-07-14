@@ -178,3 +178,60 @@ class Machine(object):
                 print("IndexError: %s" % e)
             except KeyboardInterrupt:
                 print("\nKeyboardInterrupt")
+
+def test(code = [2, 3, "+", 5, "*", "println"]):
+    print("Code before optimization: %s" % str(code))
+    optimized = constant_fold(code)
+    print("Code after optimization: %s" % str(optimized))
+
+    print("Stack after running original program:")
+    a = Machine(code)
+    a.run()
+    a.dump_stack()
+
+    print("Stack after running optimized program:")
+    b = Machine(optimized)
+    b.run()
+    b.dump_stack()
+
+    result = a.data_stack == b.data_stack
+    print("Result: %s" % ("OK" if result else "FAIL"))
+    return result
+
+def examples():
+    print("** Program 1: Runs the code for `print((2+3)*4)`")
+    Machine([2, 3, "+", 4, "*", "println"]).run()
+
+    print("\n** Program 2: Ask for numbers, computes sum and product.")
+    Machine([
+        '"Enter a number: "', "print", "read", "cast_int",
+        '"Enter another number: "', "print", "read", "cast_int",
+        "over", "over",
+        '"Their sum is: "', "print", "+", "println",
+        '"Their product is: "', "print", "*", "println"
+    ]).run()
+
+    print("\n** Program 3: Shows branching and looping (use CTRL+D to exit).")
+    Machine([
+        '"Enter a number: "', "print", "read", "cast_int",
+        '"The number "', "print", "dup", "print", '" is "', "print",
+        2, "%", 0, "==", '"even."', '"odd."', "if", "println",
+        0, "jmp" # loop forever!
+    ]).run()
+
+
+if __name__ == "__main__":
+    try:
+        if len(sys.argv) > 1:
+            cmd = sys.argv[1]
+            if cmd == "repl":
+                repl()
+            elif cmd == "test":
+                test()
+                examples()
+            else:
+                print("Commands: repl, test")
+        else:
+            repl()
+    except EOFError:
+        print("")
