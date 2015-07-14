@@ -5,6 +5,8 @@
 from __future__ import print_function
 from collections import deque
 import sys
+import tokenize
+from StringIO import StringIO
 
 class Stack(deque):
     push = deque.append
@@ -137,3 +139,4 @@ class Machine(object):
 
     def read(self):
         self.push(raw_input())
+
