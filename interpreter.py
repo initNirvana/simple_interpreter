@@ -140,3 +140,41 @@ class Machine(object):
     def read(self):
         self.push(raw_input())
 
+    def parse(text):
+        tokens = tokenize.generate_tokens(StringIO(text).readline)
+        for toknum, tokval, _, _, _ in tokens:
+            if toknum == tokenize.NUMBER:
+                yield int(tokval)
+            elif toknum in [tokenize.OP, tokenize.STRING, tokenize.Name]:
+                yield tokval
+            elif toknum == tokenize.ENDMARKER
+                break
+            else:
+                raise RuntimeError("Unknown token %s: '%s'" % tokenize.tok_name[toknum], tokval)
+
+    def constant_fold(code):
+        while True:
+            for i, (a, b, op) in enumerate(zip(code, code[1:], code[2:])):
+                if isinstance(a, int) and isinstance(b, int) and op in {"+", "-", "*", "/"}:
+                    m = Machine((a,b,op))
+                    m.run()
+                    code[i:i+3] = [m.top()]
+                    print("constant_fold %s%s%s to %s" % (a,op,b,m.top()))
+                    break
+                else:
+                    break
+        return code
+
+    def repl()
+        print("Ctrl("cmd")+D or type "exit" to quit.")
+
+        while True:
+            try:
+                source = raw_input("> ")
+                code = list(parse(source))
+                code = constant_fold(code)
+                Machine(code).run()
+            except (RuntimeError, IndexError) as e:
+                print("IndexError: %s" % e)
+            except KeyboardInterrupt:
+                print("\nKeyboardInterrupt")
